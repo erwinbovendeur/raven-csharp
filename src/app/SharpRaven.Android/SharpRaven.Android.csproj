@@ -40,6 +40,10 @@
   <ItemGroup>
     <Reference Include="Mono.Android" />
     <Reference Include="mscorlib" />
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\portable-net40+sl5+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
@@ -57,14 +61,12 @@
     <Compile Include="..\SharpRaven.NET\Data\SentryRequestFactory.cs">
       <Link>Data\SentryRequestFactory.cs</Link>
     </Compile>
-    <Compile Include="..\SharpRaven.NET\Sentry.cs">
-      <Link>Sentry.cs</Link>
-    </Compile>
     <Compile Include="..\SharpRaven.NET\Utilities\GzipUtil.cs">
       <Link>Utilities\GzipUtil.cs</Link>
     </Compile>
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sentry.cs" />
     <Compile Include="Utilities\SystemUtil.cs" />
   </ItemGroup>
   <ItemGroup>
