@@ -48,7 +48,7 @@ namespace SharpRaven.UnitTests
         [Explicit("Run to re-generate the schema.json file based on the current type layout of JsonPacket")]
         public void GenerateJsonSchema()
         {
-            var schema = SchemaHelper.GenerateSchema(typeof(JsonPacket));
+            var schema = SchemaHelper.GenerateSchema(typeof(SentryRequest));
             schema.Description = "An exception packet for Sentry";
             var path = SchemaHelper.GetSchemaPath();
 

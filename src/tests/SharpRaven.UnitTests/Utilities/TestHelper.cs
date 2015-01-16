@@ -35,7 +35,7 @@ namespace SharpRaven.UnitTests.Utilities
     public static class TestHelper
     {
         public const string DsnUri =
-            "https://7d6466e66155431495bdb4036ba9a04b:4c1cfeab7ebd4c1cb9e18008173a3630@app.getsentry.com/3739";
+            "https://74d3e971f0664ff0b4bfe3232b553a13:59a9c4ef712d437c86ab3b48bf469685@sentry.2face-it.nl/8";
 
 
         public static Exception GetException()

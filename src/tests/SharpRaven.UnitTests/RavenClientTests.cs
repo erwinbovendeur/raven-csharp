@@ -29,7 +29,8 @@
 #endregion
 
 using System;
-
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using NSubstitute;
 
 using NUnit.Framework;
@@ -45,46 +46,50 @@ namespace SharpRaven.UnitTests
     {
         private class TestableRavenClient : RavenClient
         {
-            public TestableRavenClient(string dsn, IJsonPacketFactory jsonPacketFactory = null)
-                : base(dsn, jsonPacketFactory)
+            public TestableRavenClient(string dsn, ISentryRequestFactory sentryRequestFactory = null)
+                : base(dsn, sentryRequestFactory)
             {
             }
-
-
-            protected override string Send(JsonPacket packet, Dsn dsn)
+  
+            public override Task<string> Send(SentryRequest packet)
             {
-                return packet.Project;
+                return Task.FromResult(packet.Project);
             }
         }
 
-        private class TestableJsonPacketFactory : JsonPacketFactory
+        private class TestableSentryRequestFactory : ISentryRequestFactory
         {
-            private readonly string project;
+            private readonly string _project;
+            private readonly ISentryRequestFactory _sentryRequestFactory;
 
-
-            public TestableJsonPacketFactory(string project)
+            public TestableSentryRequestFactory(string project, ISentryRequestFactory sentryRequestFactory)
             {
-                this.project = project;
+                _project = project;
+                _sentryRequestFactory = sentryRequestFactory;
             }
 
-
-            protected override JsonPacket OnCreate(JsonPacket jsonPacket)
+            public SentryRequest Create(string project, SentryMessage message, ErrorLevel level = ErrorLevel.Info, IDictionary<string, string> tags = null,
+                object extra = null)
             {
-                jsonPacket.Project = this.project;
-                return base.OnCreate(jsonPacket);
+                return _sentryRequestFactory.Create(_project, message, level, tags, extra);
+            }
+
+            public SentryRequest Create(string project, Exception exception, SentryMessage message = null, ErrorLevel level = ErrorLevel.Error,
+                IDictionary<string, string> tags = null, object extra = null)
+            {
+                return _sentryRequestFactory.Create(_project, exception, message, level, tags, extra);
             }
         }
-
 
         [Test]
         public void CaptureMessage_InvokesSend_AndJsonPacketFactoryOnCreate()
         {
             const string dsnUri =
-                "http://7d6466e66155431495bdb4036ba9a04b:4c1cfeab7ebd4c1cb9e18008173a3630@app.getsentry.com/3739";
+                "https://74d3e971f0664ff0b4bfe3232b553a13:59a9c4ef712d437c86ab3b48bf469685@sentry.2face-it.nl/8";
             var project = Guid.NewGuid().ToString();
-            var jsonPacketFactory = new TestableJsonPacketFactory(project);
+            var jsonPacketFactory = new TestableSentryRequestFactory(project, new SentryRequestFactory());
             var client = new TestableRavenClient(dsnUri, jsonPacketFactory);
-            var result = client.CaptureMessage("Test");
+            var result = client.CaptureMessage("Test").Result;
 
             Assert.That(result, Is.EqualTo(project));
         }
@@ -105,12 +110,11 @@ namespace SharpRaven.UnitTests
                            return json;
                        });
 
-            ravenClient.CaptureMessage(message);
+            ravenClient.CaptureMessage(message).Wait();
 
             // Verify that we actually received a Scrub() call:
             ravenClient.LogScrubber.Received().Scrub(Arg.Any<string>());
         }
-
 
         [Test]
         public void Constructor_NullDsnString_ThrowsArgumentNullException()
@@ -119,7 +123,6 @@ namespace SharpRaven.UnitTests
             Assert.That(exception.ParamName, Is.EqualTo("dsn"));
         }
 
-
         [Test]
         public void Constructor_NullDsn_ThrowsArgumentNullException()
         {
@@ -127,14 +130,12 @@ namespace SharpRaven.UnitTests
             Assert.That(exception.ParamName, Is.EqualTo("dsn"));
         }
 
-
         [Test]
         public void Constructor_StringDsn_CurrentDsnEqualsDsn()
         {
             IRavenClient ravenClient = new RavenClient(TestHelper.DsnUri);
             Assert.That(ravenClient.CurrentDsn.ToString(), Is.EqualTo(TestHelper.DsnUri));
         }
-
 
         [Test]
         public void Logger_IsRoot()

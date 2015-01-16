@@ -50,7 +50,7 @@ namespace SharpRaven.UnitTests
             var exception = TestHelper.GetException();
 
             // TODO: This packet should preferably be "complete", i.e. contain as much information as possible. --asbjornu
-            JsonPacket packet = new JsonPacket("https://public:secret@app.getsentry.com/1337", exception)
+            SentryRequest packet = new SentryRequest
             {
                 Level = ErrorLevel.Fatal,
                 Tags = new Dictionary<string, string>
@@ -58,7 +58,7 @@ namespace SharpRaven.UnitTests
                     { "key1", "value1" },
                     { "key2", "value2" },
                 },
-                Request = new SentryRequest
+                Request = new SentryHttpRequest
                 {
                     QueryString = "?a=b&c=d",
                     Data = new

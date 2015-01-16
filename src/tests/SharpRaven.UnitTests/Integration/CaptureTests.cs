@@ -31,7 +31,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Net;
+using System.Net.Http;
 using NUnit.Framework;
 
 using SharpRaven.Data;
@@ -68,12 +69,7 @@ namespace SharpRaven.UnitTests.Integration
         {
             const string dsnUri = "http://a:b@totally.notexisting.xyz/666";
 
-            Exception hookedException = null;
-
-            this.ravenClient = new RavenClient(dsnUri)
-            {
-                ErrorOnCapture = exp => hookedException = exp
-            };
+            this.ravenClient = new RavenClient(dsnUri);
 
             Helper.PrintInfo("In test client change!");
             Helper.PrintInfo("Sentry Uri: " + this.ravenClient.CurrentDsn.SentryUri);
@@ -82,16 +78,7 @@ namespace SharpRaven.UnitTests.Integration
             Helper.PrintInfo("Private Key: " + this.ravenClient.CurrentDsn.PrivateKey);
             Helper.PrintInfo("Project ID: " + this.ravenClient.CurrentDsn.ProjectID);
 
-            try
-            {
-                Helper.FirstLevelException();
-            }
-            catch (Exception e)
-            {
-                this.ravenClient.CaptureException(e);
-            }
-
-            Assert.That(hookedException, Is.Not.Null);
+            Assert.Throws<HttpRequestException>(async () => await this.ravenClient.CaptureException(Helper.FirstLevelException()));
         }
 
 
@@ -125,7 +112,7 @@ namespace SharpRaven.UnitTests.Integration
         {
             object[] args = Enumerable.Range(0, 5).Select(i => Guid.NewGuid()).Cast<object>().ToArray();
             var message = new SentryMessage("A {0:N} B {1:N} C {2:N} D {3:N} F {4:N}.", args);
-            var id = this.ravenClient.CaptureException(new Exception("Test without a stacktrace."), message);
+            var id = this.ravenClient.CaptureException(new Exception("Test without a stacktrace."), message).Result;
             //Console.WriteLine("Sent packet: " + id);
 
             Assert.That(id, Is.Not.Null);
@@ -149,7 +136,7 @@ namespace SharpRaven.UnitTests.Integration
                 tags["TAG"] = "TAG1";
                 extra["extra"] = "EXTRA1";
 
-                var id = this.ravenClient.CaptureException(e, tags: tags, extra: extra);
+                var id = this.ravenClient.CaptureException(e, tags: tags, extra: extra).Result;
 
                 //Console.WriteLine("Sent packet: " + id);
 
@@ -162,7 +149,7 @@ namespace SharpRaven.UnitTests.Integration
         [Test]
         public void CaptureException_WithoutStacktrace_ReturnsValidID()
         {
-            var id = this.ravenClient.CaptureException(new Exception("Test without a stacktrace."));
+            var id = ravenClient.CaptureException(new Exception("Test without a stacktrace.")).Result;
             //Console.WriteLine("Sent packet: " + id);
 
             Assert.That(id, Is.Not.Null.Or.Empty);
@@ -175,12 +162,7 @@ namespace SharpRaven.UnitTests.Integration
         {
             const string dsnUri = "http://a:b@totally.notexisting.xyz/666";
 
-            Exception hookedException = null;
-
-            this.ravenClient = new RavenClient(dsnUri)
-            {
-                ErrorOnCapture = exp => hookedException = exp
-            };
+            this.ravenClient = new RavenClient(dsnUri);
 
             Helper.PrintInfo("In test client change!");
             Helper.PrintInfo("Sentry Uri: " + this.ravenClient.CurrentDsn.SentryUri);
@@ -189,9 +171,7 @@ namespace SharpRaven.UnitTests.Integration
             Helper.PrintInfo("Private Key: " + this.ravenClient.CurrentDsn.PrivateKey);
             Helper.PrintInfo("Project ID: " + this.ravenClient.CurrentDsn.ProjectID);
 
-            this.ravenClient.CaptureMessage("Test message");
-
-            Assert.NotNull(hookedException);
+            Assert.Throws<HttpRequestException>(async () => await ravenClient.CaptureMessage("Test message"));
         }
 
 
@@ -209,14 +189,14 @@ namespace SharpRaven.UnitTests.Integration
             Helper.PrintInfo("Private Key: " + this.ravenClient.CurrentDsn.PrivateKey);
             Helper.PrintInfo("Project ID: " + this.ravenClient.CurrentDsn.ProjectID);
 
-            Assert.DoesNotThrow(() => this.ravenClient.CaptureMessage("Test message"));
+            Assert.Throws<HttpRequestException>(async () => await ravenClient.CaptureMessage("Test message"));
         }
 
 
         [Test]
         public void CaptureMessage_ReturnsValidID()
         {
-            var id = this.ravenClient.CaptureMessage("Test");
+            var id = this.ravenClient.CaptureMessage("Test").Result;
             //Console.WriteLine("Sent packet: " + id);
 
             Assert.That(id, Is.Not.Null);
@@ -227,8 +207,10 @@ namespace SharpRaven.UnitTests.Integration
         [Test]
         public void CaptureMessage_WithCompression_ReturnsValidID()
         {
-            this.ravenClient.Compression = true;
-            var id = this.ravenClient.CaptureException(new Exception("Test without a stacktrace."));
+            ravenClient.Compression = true;
+            var id = ravenClient.CaptureException(new Exception("Test without a stacktrace.")).Result;
+
+            Console.WriteLine("Returned id: " + id);
 
             Assert.That(id, Is.Not.Null);
             Assert.That(Guid.Parse(id), Is.Not.Null);
@@ -240,7 +222,7 @@ namespace SharpRaven.UnitTests.Integration
         {
             object[] args = Enumerable.Range(0, 5).Select(i => Guid.NewGuid()).Cast<object>().ToArray();
             var message = new SentryMessage("Lorem %s ipsum %s dolor %s sit %s amet %s.", args);
-            var id = this.ravenClient.CaptureMessage(message);
+            var id = this.ravenClient.CaptureMessage(message).Result;
             //Console.WriteLine("Sent packet: " + id);
 
             Assert.That(id, Is.Not.Null);
@@ -249,7 +231,7 @@ namespace SharpRaven.UnitTests.Integration
 
 
         private const string DsnUrl =
-            "https://7d6466e66155431495bdb4036ba9a04b:4c1cfeab7ebd4c1cb9e18008173a3630@app.getsentry.com/3739";
+            "https://74d3e971f0664ff0b4bfe3232b553a13:59a9c4ef712d437c86ab3b48bf469685@sentry.2face-it.nl/8";
 
         private IRavenClient ravenClient;
 
@@ -257,16 +239,25 @@ namespace SharpRaven.UnitTests.Integration
 
         private static class Helper
         {
-            public static void FirstLevelException()
+            public static Exception FirstLevelException()
             {
                 try
                 {
-                    SecondLevelException();
+                    try
+                    {
+                        SecondLevelException();
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("First Level Exception", e);
+                    }
                 }
                 catch (Exception e)
                 {
-                    throw new Exception("First Level Exception", e);
+                    return e;
                 }
+
+                return null;
             }
 
 

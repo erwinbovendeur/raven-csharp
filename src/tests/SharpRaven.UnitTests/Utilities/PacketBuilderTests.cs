@@ -41,10 +41,10 @@ namespace SharpRaven.UnitTests.Utilities
         public void CreateAuthenticationHeader_ReturnsCorrectAuthenticationHeader()
         {
             const string expected =
-                @"^Sentry sentry_version=4, sentry_client=SharpRaven/[\d\.]+, sentry_timestamp=\d+, sentry_key=7d6466e66155431495bdb4036ba9a04b, sentry_secret=4c1cfeab7ebd4c1cb9e18008173a3630$";
+                @"^Sentry sentry_version=5, sentry_client=SharpRaven.Core/[\d\.]+, sentry_timestamp=\d+, sentry_key=74d3e971f0664ff0b4bfe3232b553a13, sentry_secret=59a9c4ef712d437c86ab3b48bf469685";
 
             var dsn = new Dsn(
-                "https://7d6466e66155431495bdb4036ba9a04b:4c1cfeab7ebd4c1cb9e18008173a3630@app.getsentry.com/3739");
+                "https://74d3e971f0664ff0b4bfe3232b553a13:59a9c4ef712d437c86ab3b48bf469685@sentry.2face-it.nl/8");
 
             var authenticationHeader = PacketBuilder.CreateAuthenticationHeader(dsn);
 
