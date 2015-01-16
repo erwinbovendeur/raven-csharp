@@ -65,18 +65,17 @@ If you want automatic logging of unhandled exception in your ASP.NET project, ad
 </system.webServer>
 ```
 
-Windows Phone/Universal apps
-----------------------------
-When using SharpRaven with either Windows Phone or Universal apps, by default unhandled exceptions will end the application. Before this happens, SharpRaven will save a copy of the exception to local storage, and submit all saved exceptions the next time your application is started and a network connection is available.
+Mobile/universal apps
+---------------------
+In general, unhandled exceptions will end the application. Before this happens, SharpRaven will save a copy of the exception to local storage, and submit all saved exceptions the next time your application is started and a network connection is available.
 
 Get it!
 -------
-You can clone and build SharpRaven yourself, but for those of us who are happy with prebuilt binaries, there's [a NuGet package](https://www.nuget.org/packages/SharpRaven).
+You can clone and build SharpRaven yourself, but for those of us who are happy with prebuilt binaries, there's [a NuGet package](https://www.nuget.org/packages/SharpRaven). Note: the prebuilt binaires differ from the binaries in this repository. For this repository, no binaries are available (yet).
 
 Resources
 ---------
 * [Build Status](http://teamcity.codebetter.com/project.html?projectId=project344&tab=projectOverview) (requires registration)
-* [Code](http://github.com/getsentry/raven-csharp)
+* [Code](http://github.com/erwinbovendeur/raven-csharp)
 * [Mailing List](https://groups.google.com/group/getsentry)
 * [IRC](irc://irc.freenode.net/sentry) (irc.freenode.net, #sentry)
-
