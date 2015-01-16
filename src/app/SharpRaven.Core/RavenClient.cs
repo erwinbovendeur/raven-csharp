@@ -49,7 +49,7 @@ namespace SharpRaven
     /// </summary>
     public class RavenClient : IRavenClient
     {
-        private readonly ISentryRequestFactory _sentryRequestFactory;
+        public ISentryRequestFactory SentryRequestFactory { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RavenClient" /> class.
@@ -72,7 +72,7 @@ namespace SharpRaven
             if (dsn == null)
                 throw new ArgumentNullException("dsn");
 
-            _sentryRequestFactory = sentryRequestFactory ?? new DefaultSentryRequestFactory();
+            SentryRequestFactory = sentryRequestFactory ?? new DefaultSentryRequestFactory();
 
             CurrentDsn = dsn;
             Logger = SystemUtilFactory.Instance.Logger;
@@ -126,7 +126,7 @@ namespace SharpRaven
                                        IDictionary<string, string> tags = null,
                                        object extra = null)
         {
-            return Send(_sentryRequestFactory.Create(CurrentDsn.ProjectID, exception, message, level, tags, extra));
+            return Send(SentryRequestFactory.Create(CurrentDsn.ProjectID, exception, message, level, tags, extra));
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace SharpRaven
                                      IDictionary<string, string> tags = null,
                                      object extra = null)
         {
-            return Send(_sentryRequestFactory.Create(CurrentDsn.ProjectID, message, level, tags, extra));
+            return Send(SentryRequestFactory.Create(CurrentDsn.ProjectID, message, level, tags, extra));
         }
 
         /// <summary>

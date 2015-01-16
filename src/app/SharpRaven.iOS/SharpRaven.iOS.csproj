@@ -37,11 +37,11 @@
     <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\SharpRaven.NET\Sentry.cs">
+      <Link>Sentry.cs</Link>
+    </Compile>
     <Compile Include="..\SharpSentry.NET\Data\SentryRequestFactory.cs">
       <Link>Data\SentryRequestFactory.cs</Link>
-    </Compile>
-    <Compile Include="..\SharpSentry.NET\Sentry.cs">
-      <Link>Sentry.cs</Link>
     </Compile>
     <Compile Include="..\SharpSentry.NET\Utilities\GzipUtil.cs">
       <Link>Utilities\GzipUtil.cs</Link>
