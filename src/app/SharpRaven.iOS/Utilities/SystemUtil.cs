@@ -31,6 +31,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UIKit;
 
 namespace SharpRaven.Utilities
 {
@@ -55,12 +56,12 @@ namespace SharpRaven.Utilities
 
         public string MachineName
         {
-            get { return Environment.MachineName; }
+            get { return UIDevice.CurrentDevice.SystemName; }
         }
 
         public string UserName
         {
-            get { return Environment.UserName; }
+            get { return UIDevice.CurrentDevice.SystemVersion; }
         }
 
         /// <summary>
