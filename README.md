@@ -1,14 +1,21 @@
-Usage
+Usage 
 =====
-Instantiate the client with your DSN:
+Add a reference to both SharpRaven.Core, and a platform specific SharpRaven assembly. Regular .NET projects use SharpRaven.NET.
+
+Bootstrap Sentry by calling:
+
+```csharp
+Sentry.Init();
+Sentry.Dsn = "http://public:secret@example.com/project-id";
+```
+
+or instantiate a client with your DSN:
 ```csharp
 var ravenClient = new RavenClient("http://public:secret@example.com/project-id");
 ```
 
 Capturing Exceptions
 --------------------
-Call out to the client in your catch block:
-
 ```csharp
 try
 {
@@ -17,8 +24,13 @@ try
 }
 catch (Exception e)
 {
-    ravenClient.CaptureException(e);
+    Sentry.CaptureException(e);
 }
+```
+
+or use the instantiated client:
+```csharp
+    ravenClient.CaptureException(e);
 ```
 
 Logging Non-Exceptions
@@ -39,6 +51,18 @@ The full argument specs are:
 ```csharp
 CaptureException(Exception e, IDictionary<string, string> tags = null, object extra = null)
 CaptureMessage(string message, ErrorLevel level = ErrorLevel.info, Dictionary<string, string> tags = null, object extra = null)
+```
+
+ASP.NET Unhandled exception logging
+-----------------------------------
+If you want automatic logging of unhandled exception in your ASP.NET project, add the following handler to your web.config. Remember, for this to work, you must initialize Sentry and set the DSN.
+
+```
+<system.webServer>
+  <modules>
+    <add name="ErrorLog" type="SharpRaven.Http.SentryHttpModule, SharpRaven" preCondition="managedHandler" />
+  </modules>
+</system.webServer>
 ```
 
 Get it!
